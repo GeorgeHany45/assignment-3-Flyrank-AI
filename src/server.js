@@ -68,6 +68,42 @@ app.post("/auth/login", async (req, res) => {
     refresh_token: data.session.refresh_token,
   });
 });
+app.get("/public", (req, res) => {
+  res.json({
+    message: "This is a public route",
+  });
+});
+
+app.get("/private", async (req, res) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({
+      error: "Unauthorized",
+    });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(token);
+
+  if (error || !user) {
+    return res.status(401).json({
+      error: "Unauthorized",
+    });
+  }
+
+  return res.status(200).json({
+    message: "This is a private route",
+    user: {
+      id: user.id,
+      email: user.email,
+    },
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
