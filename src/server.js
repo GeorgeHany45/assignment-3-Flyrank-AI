@@ -83,7 +83,19 @@ app.get("/private", requireAuth, (req, res) => {
     },
   });
 });
+app.post("/auth/logout", async (req, res) => {
+  const { error } = await supabase.auth.signOut();
 
+  if (error) {
+    return res.status(400).json({
+      error: error.message,
+    });
+  }
+
+  return res.status(200).json({
+    message: "Logged out successfully",
+  });
+});
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log("Server running and connected to Supabase");
